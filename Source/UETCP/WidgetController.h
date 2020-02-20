@@ -12,7 +12,7 @@ class UETCP_API AWidgetController : public APlayerController
 {
 	GENERATED_BODY()
 	
-public:
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
 	TSubclassOf<class UMyUserWidget> WidgetClass;
 

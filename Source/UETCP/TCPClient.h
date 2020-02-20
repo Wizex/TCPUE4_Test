@@ -3,37 +3,23 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Sockets.h"
 #include "Core.h"
 #include "Converter.h"
+#include "TCPWrapper.h"
 
-DECLARE_DELEGATE_OneParam(FOnClientDataReceived, const FData&);
-
-class UETCP_API FTCPClient
+class UETCP_API FTCPClient : public FTCPWrapper
 {
 public:
 	FTCPClient(const FString&, const uint32);
+	
+	FTCPClient() = delete;
+	~FTCPClient() = default;
 
-	bool Receive();
 	bool SendMsg(FData&);
 	bool Connect();
-	bool Disconnect();
-	bool Setup(const FString&, const uint32);
+	bool Disconnect() final;
 
-	FOnClientDataReceived& OnClientDataReceived() { return mOnClientDataReceived; }
-
-protected:
-	FTCPClient();
+private:
 
 	bool SendNonBlocking(const uint8*, const int32);
-
-	TArray<uint8> mCachedData;
-
-	int mNumBytesToReceive;
-
-	FSocket* mSocket;
-
-	TSharedPtr<FInternetAddr> mInternetAddr;
-
-	FOnClientDataReceived mOnClientDataReceived;
 };
