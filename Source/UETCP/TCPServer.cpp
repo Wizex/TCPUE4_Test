@@ -5,7 +5,7 @@
 #include "Networking/Public/Common/TcpSocketBuilder.h"
 #include "Networking/Public/Interfaces/IPv4/IPv4Address.h"
 
-FTCPServer::FTCPServer(const FString& Ip, const uint32 Port) : bAccepted(false), mServerSocket(nullptr), mClient(nullptr)
+FTCPServer::FTCPServer(const FString& Ip, const uint32 Port) : mServerSocket(nullptr), mClient(nullptr)
 {
 	SetupSocket(Ip, Port);
 
@@ -78,8 +78,6 @@ bool FTCPServer::TryAccept()
 					UE_LOG(LogTemp, Log, TEXT("Connection accepted"));
 
 					mClient.SetSocket(ConnectionSocket);
-					
-					bAccepted = true;
 				}
 			}
 		}
@@ -90,10 +88,7 @@ bool FTCPServer::TryAccept()
 bool FTCPServer::OnTick(float DeltaTime)
 {
 	TryAccept();
-	if (bAccepted) 
-	{
-		mClient.Receive();
-	}
+	mClient.Receive();
 	return true;
 }
 

@@ -25,7 +25,6 @@ public:
 	void SetSocket(FSocket* Socket);
 	
 private:
-	
 	bool SendNonBlocking(const uint8* Msg, const int32 Size);
 	void Destroy();
 	void Setup(const FString& Ip, const uint32 Port);

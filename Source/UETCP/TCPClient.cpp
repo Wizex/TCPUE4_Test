@@ -102,7 +102,7 @@ bool FTCPClient::SendNonBlocking(const uint8* Msg, const int32 Size)
 
 bool FTCPClient::Receive()
 {
-	if (mClientSocket->GetConnectionState() != ESocketConnectionState::SCS_Connected)
+	if (!mClientSocket || mClientSocket->GetConnectionState() != ESocketConnectionState::SCS_Connected)
 	{
 		return false;
 	}

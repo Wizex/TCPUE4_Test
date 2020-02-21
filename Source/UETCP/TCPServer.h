@@ -25,8 +25,6 @@ public:
 private:
 	bool TryAccept();
 	void Destroy();
-
-	bool bAccepted;
 	
 	FSocket* mServerSocket;
 
