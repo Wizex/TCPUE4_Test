@@ -12,32 +12,32 @@ DECLARE_DELEGATE_OneParam(FOnClientDataReceived, const FData&);
 class UETCP_API FTCPClient
 {
 public:
-	FTCPClient(const FString&, const uint32);
-	FTCPClient(FSocket*);
-	
+	FTCPClient(const FString& Ip, const uint32 Port);
+	FTCPClient(FSocket* Socket);
+
+	FTCPClient() = delete;
 	~FTCPClient();
 
 	bool Receive();
-	bool SendMsg(FData&);
+	bool SendMsg(FData& Data);
 	bool Connect();
 	bool Disconnect();
-
-private:
-	FTCPClient();
+	void SetSocket(FSocket* Socket);
 	
-	bool SendNonBlocking(const uint8*, const int32);
+private:
+	
+	bool SendNonBlocking(const uint8* Msg, const int32 Size);
 	void Destroy();
-	bool Setup(const FString&, const uint32);
-	bool Setup(FSocket*);
+	void Setup(const FString& Ip, const uint32 Port);
 	void ParseData();
 	
 	FOnClientDataReceived& OnClientDataReceived() { return mOnClientDataReceived; }
 
 	TArray<uint8> mCachedData;
 
-	int mNumBytesToReceive;
+	int mNumBytesToReceive = 0;
 
-	FSocket* mClientSocket;
+	FSocket* mClientSocket = nullptr;
 
 	TSharedPtr<FInternetAddr> mInternetAddr;
 

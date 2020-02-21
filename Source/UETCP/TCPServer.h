@@ -10,16 +10,17 @@
 class UETCP_API FTCPServer
 {
 public:
-    FTCPServer(const FString&, const uint32);
+    FTCPServer(const FString& Ip, const uint32 Port);
 	
 	FTCPServer() = delete;
 	~FTCPServer();
 	
-	bool Bind();
-	bool Listen(const uint32);
-	bool OnTick(float);
-	bool Disconnect();
-	bool SendMsg(FData&);
+	void Bind();
+	void Listen(const uint32 Backlogs);
+	bool OnTick(float DeltaTime);
+	bool CloseConnections();
+	bool SendMsg(FData& Data);
+	void SetupSocket(const FString& Ip, const uint32 Port);
 
 private:
 	bool TryAccept();
@@ -33,5 +34,5 @@ private:
 
 	TSharedPtr<FInternetAddr> mInternetAddr;
 
-	FTCPClient* mClient;
+	FTCPClient mClient;
 };

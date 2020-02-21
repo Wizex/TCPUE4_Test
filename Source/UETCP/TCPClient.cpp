@@ -5,39 +5,21 @@
 #include <algorithm>
 #include "MessageString.h"
 
-FTCPClient::FTCPClient() : mNumBytesToReceive(0), mClientSocket(nullptr) {}
-
-FTCPClient::FTCPClient(const FString& Ip, const uint32 Port) : FTCPClient()
+FTCPClient::FTCPClient(const FString& Ip, const uint32 Port)
 {
-	if (Setup(Ip, Port) == false)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to setup TCP socket"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("Success to setup TCP socket"));
-
-		mClientSocket = FTcpSocketBuilder("Socket").AsReusable().AsNonBlocking();
-		if (mClientSocket == nullptr)
-		{
-			UE_LOG(LogTemp, Log, TEXT("Socket is NULL"));
-		}
-	}
+	Setup(Ip, Port);
+	
+	mClientSocket = FTcpSocketBuilder("Socket").AsReusable().AsNonBlocking();
+	
+	check(mClientSocket);
 }
 
-FTCPClient::FTCPClient(FSocket* Socket) : FTCPClient()
+FTCPClient::FTCPClient(FSocket* Socket)
 {
-	if (Setup(Socket)== false)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to setup TCP socket"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("Success to setup TCP socket"));
-	}
+	SetSocket(Socket);
 }
 
-bool FTCPClient::Setup(const FString& Ip, const uint32 Port)
+void FTCPClient::Setup(const FString& Ip, const uint32 Port)
 {
 	FIPv4Address Ipv4;
 	FIPv4Address::Parse(Ip, Ipv4);
@@ -46,15 +28,12 @@ bool FTCPClient::Setup(const FString& Ip, const uint32 Port)
 
 	mInternetAddr->SetIp(Ipv4.Value);
 	mInternetAddr->SetPort(Port);
-
-	return true;
 }
 
-bool FTCPClient::Setup(FSocket* Socket)
+void FTCPClient::SetSocket(FSocket* Socket)
 {
+	Disconnect();
 	mClientSocket = Socket;
-
-	return true;
 }
 
 bool FTCPClient::Connect()
@@ -64,7 +43,7 @@ bool FTCPClient::Connect()
 		UE_LOG(LogTemp, Log, TEXT("Socket is NULL"));
 		return false;
 	}
-	if (mClientSocket->Connect(*mInternetAddr) != true)
+	if (!mClientSocket->Connect(*mInternetAddr))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to connect socket"));
 		UE_LOG(LogTemp, Log, TEXT("Socket closed"));
@@ -125,7 +104,6 @@ bool FTCPClient::Receive()
 {
 	if (mClientSocket->GetConnectionState() != ESocketConnectionState::SCS_Connected)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Socket is not connected"));
 		return false;
 	}
 	uint32 PendingData = -1;
@@ -172,18 +150,13 @@ void FTCPClient::ParseData()
 {
 	UE_LOG(LogTemp, Log, TEXT("Data received"));
 
-	FData DataStruct;
+	FData DataStruct = FConverter::Convert(mCachedData);
 
 	FArrayReader Reader;
-	Reader.Append(mCachedData);
-
-	Reader << DataStruct;
-
-	FArrayReader R2;
-	R2.Append(DataStruct.SerializedData);
+	Reader.Append(DataStruct.SerializedData);
 
 	FMessageString Msg;
-	R2 << Msg;
+	Reader << Msg;
 
 	UE_LOG(LogTemp, Log, TEXT("Message:%s"), *Msg.Str);
 
@@ -193,8 +166,8 @@ void FTCPClient::ParseData()
 }
 
 bool FTCPClient::Disconnect()
-{
-	if (mClientSocket->GetConnectionState() == ESocketConnectionState::SCS_Connected)
+{	
+	if (mClientSocket != nullptr && mClientSocket->GetConnectionState() == ESocketConnectionState::SCS_Connected)
 	{
 		if (!mClientSocket->Close())
 		{

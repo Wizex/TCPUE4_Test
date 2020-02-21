@@ -4,9 +4,21 @@
 #include "MessageString.h"
 #include "Networking/Public/Common/TcpSocketBuilder.h"
 #include "Networking/Public/Interfaces/IPv4/IPv4Address.h"
-#include "Networking/Public/Common/UdpSocketReceiver.h"
 
 FTCPServer::FTCPServer(const FString& Ip, const uint32 Port) : bAccepted(false), mServerSocket(nullptr), mClient(nullptr)
+{
+	SetupSocket(Ip, Port);
+
+	mServerSocket = FTcpSocketBuilder("Socket").AsReusable().AsNonBlocking();
+
+	check(mServerSocket);
+
+	FTicker& Ticker = FTicker::GetCoreTicker();
+	TickDelegate = FTickerDelegate::CreateRaw(this, &FTCPServer::OnTick);
+	Ticker.AddTicker(TickDelegate, 0.0f);
+}
+
+void FTCPServer::SetupSocket(const FString& Ip, const uint32 Port)
 {
 	FIPv4Address Ipv4;
 	FIPv4Address::Parse(Ip, Ipv4);
@@ -15,52 +27,39 @@ FTCPServer::FTCPServer(const FString& Ip, const uint32 Port) : bAccepted(false),
 
 	mInternetAddr->SetIp(Ipv4.Value);
 	mInternetAddr->SetPort(Port);
-	
-	mServerSocket = FTcpSocketBuilder("Socket").AsReusable().AsNonBlocking();
-	if (mServerSocket == nullptr)
-	{
-		UE_LOG(LogTemp, Log, TEXT("Socket is NULL"));
-	}
-	
-	FTicker& Ticker = FTicker::GetCoreTicker();
-	TickDelegate = FTickerDelegate::CreateRaw(this, &FTCPServer::OnTick);
-	Ticker.AddTicker(TickDelegate, 0.0f);
 }
 
-bool FTCPServer::Bind()
+void FTCPServer::Bind()
 {
-	if (mServerSocket == nullptr)
-	{
-		UE_LOG(LogTemp, Log, TEXT("Socket is NULL"));
-		return false;
-	}
-	if (mServerSocket->Bind(*mInternetAddr) != true)
+	if (!mServerSocket->Bind(*mInternetAddr) || mServerSocket == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to bind server"));
 		UE_LOG(LogTemp, Log, TEXT("Socket closed"));
-		Disconnect();
-		return false;
+		CloseConnections();
 	}
-	UE_LOG(LogTemp, Log, TEXT("Success to bind server"));
-	return true;
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Success to bind server"));
+	}
 }
 
-bool FTCPServer::Listen(const uint32 BackLogs)
+void FTCPServer::Listen(const uint32 BackLogs)
 {
-	if(mServerSocket->Listen(BackLogs) != true)
+	if (!mServerSocket->Listen(BackLogs))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to listen for connection"));
 		UE_LOG(LogTemp, Log, TEXT("Socket closed"));
-		Disconnect();
-		return false;
+		CloseConnections();
 	}
-	UE_LOG(LogTemp, Log, TEXT("Listen success"));
-	return true;
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Listen success"));
+	}
 }
 
 bool FTCPServer::SendMsg(FData& Data)
 {
-	return mClient->SendMsg(Data);
+	return mClient.SendMsg(Data);
 }
 
 bool FTCPServer::TryAccept()
@@ -78,11 +77,8 @@ bool FTCPServer::TryAccept()
 				{
 					UE_LOG(LogTemp, Log, TEXT("Connection accepted"));
 
-					if(mClient != nullptr)
-					{
-						mClient->Disconnect();
-					}
-					mClient = new FTCPClient(ConnectionSocket);
+					mClient.SetSocket(ConnectionSocket);
+					
 					bAccepted = true;
 				}
 			}
@@ -96,7 +92,7 @@ bool FTCPServer::OnTick(float DeltaTime)
 	TryAccept();
 	if (bAccepted) 
 	{
-		mClient->Receive();
+		mClient.Receive();
 	}
 	return true;
 }
@@ -107,20 +103,17 @@ void FTCPServer::Destroy()
 	mServerSocket = nullptr;
 }
 
-bool FTCPServer::Disconnect()
+bool FTCPServer::CloseConnections()
 {
-	if (mServerSocket->GetConnectionState() == ESocketConnectionState::SCS_Connected)
+	mClient.Disconnect();
+	if (!mServerSocket->Close())
 	{
-		if (!mServerSocket->Close())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to close socket"));
-			return false;
-		}
-		UE_LOG(LogTemp, Log, TEXT("Socket closed"));
-		Destroy();
-		return true;
+		UE_LOG(LogTemp, Warning, TEXT("Failed to close socket"));
+		return false;
 	}
-	return false;
+	UE_LOG(LogTemp, Log, TEXT("Socket closed"));
+	Destroy();
+	return true;
 }
 
 FTCPServer::~FTCPServer()

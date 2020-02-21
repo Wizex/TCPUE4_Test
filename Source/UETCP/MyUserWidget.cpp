@@ -45,7 +45,7 @@ void UMyUserWidget::CloseServerEvent()
 {
 	if (mServer != nullptr)
 	{
-		mServer->Disconnect();
+		mServer->CloseConnections();
 	}
 }
 

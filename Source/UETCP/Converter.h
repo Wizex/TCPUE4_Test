@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Data.h"
+#include "ArrayReader.h"
 
 class UETCP_API FConverter
 {
@@ -18,5 +19,18 @@ public:
 		Struct.SerializedData = Writer;
 		
 		return Struct;
+	}
+
+	static FData Convert(TArray<uint8> ByteArray)
+	{
+		FArrayReader Reader;
+
+		Reader.Append(ByteArray);
+		
+		FData DataStruct;
+
+		Reader << DataStruct;
+
+		return DataStruct;
 	}
 };
