@@ -21,7 +21,7 @@ public:
 		return Struct;
 	}
 
-	static FData Convert(TArray<uint8> ByteArray)
+	static FData Convert(const TArray<uint8>& ByteArray)
 	{
 		FArrayReader Reader;
 

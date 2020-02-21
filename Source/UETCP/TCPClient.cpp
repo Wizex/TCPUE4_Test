@@ -127,13 +127,16 @@ bool FTCPClient::Receive()
 				}
 			}
 		}
-
-		while (ReadBytes > 0 && mNumBytesToReceive > 0)
-		{
+		while (mNumBytesToReceive > 0)
+		{	
 			if (!mClientSocket->Recv(mCachedData.GetData() + mCachedData.Num() - mNumBytesToReceive, mNumBytesToReceive, ReadBytes))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Failed to recieve data"));
 				return false;
+			}
+			if (ReadBytes > 0)
+			{
+				break;
 			}
 			mNumBytesToReceive -= ReadBytes;
 		}
@@ -167,7 +170,7 @@ void FTCPClient::ParseData()
 
 bool FTCPClient::Disconnect()
 {	
-	if (mClientSocket != nullptr && mClientSocket->GetConnectionState() == ESocketConnectionState::SCS_Connected)
+	if (mClientSocket != nullptr)
 	{
 		if (!mClientSocket->Close())
 		{
