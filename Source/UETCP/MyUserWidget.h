@@ -6,7 +6,6 @@
 #include "Blueprint/UserWidget.h"
 #include "Button.h"
 #include "EditableTextBox.h"
-#include "TCPClient.h"
 #include "TCPServer.h"
 #include "MyUserWidget.generated.h"
 

@@ -5,21 +5,41 @@
 #include "CoreMinimal.h"
 #include "Core.h"
 #include "Converter.h"
-#include "TCPWrapper.h"
+#include "Sockets.h"
 
-class UETCP_API FTCPClient : public FTCPWrapper
+DECLARE_DELEGATE_OneParam(FOnClientDataReceived, const FData&);
+
+class UETCP_API FTCPClient
 {
 public:
 	FTCPClient(const FString&, const uint32);
+	FTCPClient(FSocket*);
 	
-	FTCPClient() = delete;
-	~FTCPClient() = default;
+	~FTCPClient();
 
+	bool Receive();
 	bool SendMsg(FData&);
 	bool Connect();
-	bool Disconnect() final;
+	bool Disconnect();
 
 private:
-
+	FTCPClient();
+	
 	bool SendNonBlocking(const uint8*, const int32);
+	void Destroy();
+	bool Setup(const FString&, const uint32);
+	bool Setup(FSocket*);
+	void ParseData();
+	
+	FOnClientDataReceived& OnClientDataReceived() { return mOnClientDataReceived; }
+
+	TArray<uint8> mCachedData;
+
+	int mNumBytesToReceive;
+
+	FSocket* mClientSocket;
+
+	TSharedPtr<FInternetAddr> mInternetAddr;
+
+	FOnClientDataReceived mOnClientDataReceived;
 };

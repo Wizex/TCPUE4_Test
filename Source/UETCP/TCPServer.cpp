@@ -4,11 +4,18 @@
 #include "MessageString.h"
 #include "Networking/Public/Common/TcpSocketBuilder.h"
 #include "Networking/Public/Interfaces/IPv4/IPv4Address.h"
-#include <iostream>
 #include "Networking/Public/Common/UdpSocketReceiver.h"
 
-FTCPServer::FTCPServer(const FString& Ip, const uint32 Port) : FTCPWrapper(Ip, Port), mServerSocket(nullptr)
+FTCPServer::FTCPServer(const FString& Ip, const uint32 Port) : bAccepted(false), mServerSocket(nullptr), mClient(nullptr)
 {
+	FIPv4Address Ipv4;
+	FIPv4Address::Parse(Ip, Ipv4);
+
+	mInternetAddr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
+
+	mInternetAddr->SetIp(Ipv4.Value);
+	mInternetAddr->SetPort(Port);
+	
 	mServerSocket = FTcpSocketBuilder("Socket").AsReusable().AsNonBlocking();
 	if (mServerSocket == nullptr)
 	{
@@ -51,6 +58,11 @@ bool FTCPServer::Listen(const uint32 BackLogs)
 	return true;
 }
 
+bool FTCPServer::SendMsg(FData& Data)
+{
+	return mClient->SendMsg(Data);
+}
+
 bool FTCPServer::TryAccept()
 {
 	if (mServerSocket != nullptr) 
@@ -66,7 +78,12 @@ bool FTCPServer::TryAccept()
 				{
 					UE_LOG(LogTemp, Log, TEXT("Connection accepted"));
 
-					mClientSocket = ConnectionSocket;
+					if(mClient != nullptr)
+					{
+						mClient->Disconnect();
+					}
+					mClient = new FTCPClient(ConnectionSocket);
+					bAccepted = true;
 				}
 			}
 		}
@@ -77,9 +94,17 @@ bool FTCPServer::TryAccept()
 bool FTCPServer::OnTick(float DeltaTime)
 {
 	TryAccept();
-	Receive();
-	
+	if (bAccepted) 
+	{
+		mClient->Receive();
+	}
 	return true;
+}
+
+void FTCPServer::Destroy()
+{
+	ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->DestroySocket(mServerSocket);
+	mServerSocket = nullptr;
 }
 
 bool FTCPServer::Disconnect()
@@ -92,7 +117,7 @@ bool FTCPServer::Disconnect()
 			return false;
 		}
 		UE_LOG(LogTemp, Log, TEXT("Socket closed"));
-		Destroy(mServerSocket);
+		Destroy();
 		return true;
 	}
 	return false;
@@ -101,8 +126,9 @@ bool FTCPServer::Disconnect()
 FTCPServer::~FTCPServer()
 {
 	FTicker::GetCoreTicker().RemoveTicker(TickDelegate.GetHandle());
-	if (mServerSocket != nullptr) {
-		Destroy(mServerSocket);
+	if (mServerSocket != nullptr) 
+	{
+		Destroy();
 	}
 }
 
