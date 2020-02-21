@@ -134,7 +134,7 @@ bool FTCPClient::Receive()
 				UE_LOG(LogTemp, Warning, TEXT("Failed to recieve data"));
 				return false;
 			}
-			if (ReadBytes > 0)
+			if (ReadBytes <= 0)
 			{
 				break;
 			}
