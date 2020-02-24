@@ -20,13 +20,13 @@ private:
 	UFUNCTION()
 	void CloseClientEvent();
 	UFUNCTION()
-	void SentClientEvent();
+	void SendClientEvent();
 	UFUNCTION()
 	void StartServerEvent();
 	UFUNCTION()
 	void CloseServerEvent();
 	UFUNCTION()
-	void SentServerEvent();
+	void SendServerEvent();
 
 public:
 	void NativeOnInitialized() final;

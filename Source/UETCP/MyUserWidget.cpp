@@ -9,11 +9,11 @@ void UMyUserWidget::NativeOnInitialized()
 
 	StartClientButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::StartClientEvent);
 	CloseClientButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::CloseClientEvent);
-	SentButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::SentClientEvent);
+	SendButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::SendClientEvent);
 	
 	StartServerButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::StartServerEvent);
 	CloseServerButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::CloseServerEvent);
-	SentServerButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::SentServerEvent);
+	SendServerButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::SendServerEvent);
 }
 
 void UMyUserWidget::StartClientEvent()
