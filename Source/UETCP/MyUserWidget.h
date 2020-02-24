@@ -7,6 +7,7 @@
 #include "Button.h"
 #include "EditableTextBox.h"
 #include "TCPServer.h"
+#include "TCPClientWrapper.h"
 #include "MyUserWidget.generated.h"
 
 UCLASS()
@@ -24,6 +25,8 @@ private:
 	void StartServerEvent();
 	UFUNCTION()
 	void CloseServerEvent();
+	UFUNCTION()
+	void SentServerEvent();
 
 public:
 	void NativeOnInitialized() final;
@@ -34,10 +37,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UButton* SentButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UButton* StartServerButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UButton* CloseServerButton;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UButton* SentServerButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UEditableTextBox* TextBox;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UEditableTextBox* TextBoxServer;
 
 private:
-	TUniquePtr<FTCPClient> mClient;
+	TUniquePtr<FTCPClientWrapper> mClient;
 	TUniquePtr<FTCPServer> mServer;
-	
 };
