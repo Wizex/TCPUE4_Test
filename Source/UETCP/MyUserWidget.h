@@ -34,10 +34,10 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UButton* StartClientButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UButton* CloseClientButton;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UButton* SentButton;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UButton* SendButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UButton* StartServerButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UButton* CloseServerButton;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UButton* SentServerButton;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UButton* SendServerButton;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UEditableTextBox* TextBox;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) UEditableTextBox* TextBoxServer;
 

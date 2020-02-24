@@ -14,8 +14,8 @@ FTCPServer::FTCPServer(const FString& Ip, const uint32 Port) : mServerSocket(nul
 	check(mServerSocket);
 
 	FTicker& Ticker = FTicker::GetCoreTicker();
-	TickDelegate = FTickerDelegate::CreateRaw(this, &FTCPServer::OnTick);
-	Ticker.AddTicker(TickDelegate, 0.0f);
+	mTickDelegate = FTickerDelegate::CreateRaw(this, &FTCPServer::OnTick);
+	Ticker.AddTicker(mTickDelegate, 0.0f);
 }
 
 void FTCPServer::SetupSocket(const FString& Ip, const uint32 Port)
@@ -113,7 +113,7 @@ bool FTCPServer::CloseConnections()
 
 FTCPServer::~FTCPServer()
 {
-	FTicker::GetCoreTicker().RemoveTicker(TickDelegate.GetHandle());
+	FTicker::GetCoreTicker().RemoveTicker(mTickDelegate.GetHandle());
 	if (mServerSocket != nullptr) 
 	{
 		Destroy();

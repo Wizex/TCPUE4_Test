@@ -30,7 +30,7 @@ void UMyUserWidget::StartServerEvent()
 	mServer->OnTick(0);
 }
 
-void UMyUserWidget::SentClientEvent()
+void UMyUserWidget::SendClientEvent()
 {
 	if (mClient != nullptr) 
 	{
@@ -42,7 +42,7 @@ void UMyUserWidget::SentClientEvent()
 	}
 }
 
-void UMyUserWidget::SentServerEvent()
+void UMyUserWidget::SendServerEvent()
 {
 	if(mServer != nullptr)
 	{

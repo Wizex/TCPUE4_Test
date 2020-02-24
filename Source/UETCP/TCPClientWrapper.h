@@ -17,5 +17,6 @@ public:
 	bool OnTick(float DeltaTime);
 
 private:
-	FTickerDelegate TickDelegate;
+	
+	FTickerDelegate mTickDelegate;
 };

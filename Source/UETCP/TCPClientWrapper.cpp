@@ -6,17 +6,18 @@
 FTCPClientWrapper::FTCPClientWrapper(const FString& Ip, const uint32 Port) : FTCPClient(Ip, Port)
 {
 	FTicker& Ticker = FTicker::GetCoreTicker();
-	TickDelegate = FTickerDelegate::CreateRaw(this, &FTCPClientWrapper::OnTick);
-	Ticker.AddTicker(TickDelegate, 0.0f);
+	mTickDelegate = FTickerDelegate::CreateRaw(this, &FTCPClientWrapper::OnTick);
+	Ticker.AddTicker(mTickDelegate, 0.0f);
 }
 
 bool FTCPClientWrapper::OnTick(float DeltaTime)
 {
-	return Receive();
+	Receive();
+	return true;
 }
 
 FTCPClientWrapper::~FTCPClientWrapper()
 {
-	FTicker::GetCoreTicker().RemoveTicker(TickDelegate.GetHandle());
+	FTicker::GetCoreTicker().RemoveTicker(mTickDelegate.GetHandle());
 }
 

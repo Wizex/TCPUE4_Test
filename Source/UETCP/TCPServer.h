@@ -28,7 +28,7 @@ private:
 	
 	FSocket* mServerSocket;
 
-	FTickerDelegate TickDelegate;
+	FTickerDelegate mTickDelegate;
 
 	TSharedPtr<FInternetAddr> mInternetAddr;
 
