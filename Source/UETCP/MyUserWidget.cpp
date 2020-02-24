@@ -9,15 +9,16 @@ void UMyUserWidget::NativeOnInitialized()
 
 	StartClientButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::StartClientEvent);
 	CloseClientButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::CloseClientEvent);
-	SentButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::SentClientEvent);
+	SendButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::SendClientEvent);
 	
 	StartServerButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::StartServerEvent);
 	CloseServerButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::CloseServerEvent);
+	SendServerButton->OnClicked.AddUniqueDynamic(this, &UMyUserWidget::SendServerEvent);
 }
 
 void UMyUserWidget::StartClientEvent()
 {
-	mClient = MakeUnique<FTCPClient>("127.0.0.1", 5555);
+	mClient = MakeUnique<FTCPClientWrapper>("127.0.0.1", 5555);
 	mClient->Connect();
 }
 
@@ -29,7 +30,7 @@ void UMyUserWidget::StartServerEvent()
 	mServer->OnTick(0);
 }
 
-void UMyUserWidget::SentClientEvent()
+void UMyUserWidget::SendClientEvent()
 {
 	if (mClient != nullptr) 
 	{
@@ -38,6 +39,18 @@ void UMyUserWidget::SentClientEvent()
 		FData Data = FConverter::Convert(Message, 5);
 
 		mClient->SendMsg(Data);
+	}
+}
+
+void UMyUserWidget::SendServerEvent()
+{
+	if(mServer != nullptr)
+	{
+		FMessageString Message;
+		Message.Str = TextBoxServer->GetText().ToString();
+		FData Data = FConverter::Convert(Message, 5);
+
+		mServer->SendMsg(Data);
 	}
 }
 
